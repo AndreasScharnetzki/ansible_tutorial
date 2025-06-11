@@ -1,0 +1,1 @@
+eval $(ssh-agent -s) && ssh-add ~/.ssh/anschar_default && ssh-add -l &&  ssh -T git@github.com

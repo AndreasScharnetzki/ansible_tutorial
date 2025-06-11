@@ -1,0 +1,52 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:                                    # These (pre-)Tasks have to be completed, before any other task
+
+  - name: install updates (CentOS)
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "CentOS"  
+  
+  - name: install updates (Ubuntu)
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"  
+  
+#--------------------------------------------
+  
+- hosts: web_servers
+  become: true
+  tasks: 
+
+#----------------[Ubuntu]--------------------
+
+  - name: install apache2 package and php support
+    apt:
+      name:
+        - apache2
+        - libapache2-mod-php
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+#----------------[CentOS]--------------------
+
+  - name: install apache2 package and php support
+    dnf:
+      name:
+        - httpd
+        - php
+      state: latest
+    when: ansible_distribution == "CentOS"
+
+  - name: copy default html to webservers
+    tags: apache,apache2,httpd
+    copy:
+      src: default_site.html
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
